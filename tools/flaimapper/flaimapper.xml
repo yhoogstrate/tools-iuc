@@ -10,16 +10,18 @@
     <command detect_errors="exit_code"><![CDATA[
         flaimapper
             -v
-            -f '${output_format}'
+            -f '${output_select.output_format}'
             -o '${output}'
-            
-            #if $fasta:
-                -r '${fasta}'
+
+            #if $output_select.output_format == '1':
+                #if $output_select.fasta:
+                    -r '${output_select.fasta}'
+                #end if
+            #else
+                --offset5p ${output_select.offset5p}
+                --offset3p ${output_select.offset3p}
             #end if
-            
-            --offset5p $offset5p
-            --offset3p $offset3p
-            
+
             #if $parameters:
                 -p '${parameters}'
             #end if
@@ -32,29 +34,40 @@
                label="Alignment file"
                help="Aligned small RNA-Seq reads must be single end and should not be fragmented in the library preparation" />
         
-        <param name="fasta" type="data" format="fasta" optional="true"
-               label="Fasta sequence corresponding to reference genome" help="By selecting this file, the sequences will be given in the tabular output file" />
-        
-        <param name="output_format" type="select" label="Output format">
-            <option value="1">Tabular (sequences are provided if a FASTA reference is provided)</option>
-            <option value="2">GTF</option>
-        </param>
-        
-        <param name="offset5p" type="integer" value="4"
-               label="5' offset added to the exon-type entries in GTF format"
-               help="This parameter has only effect if the output format is GTF" />
-        <param name="offset3p" type="integer" value="4"
-               label="3' offset added to the exon-type entries in GTF format"
-               help="This parameter has only effect if the output format is GTF" />
+        <conditional name="output_select">
+            <param name="output_format" type="select" label="Output format" argument="-f">
+                <option value="1">Tabular</option>
+                <option value="2">GTF</option>
+            </param>
+            
+            <when value="1">
+                <param name="fasta" type="data" format="fasta" optional="true"
+                       label="(Optional) Genome reference in FASTA format that corresponds to the reference genome or RNA database" help="By selecting this file, sequences will be provided in the corresponding column in the output file" argument="-r" />
+            </when>
+            
+            <when value="2">
+                <param name="offset5p" type="integer" value="4"
+                       label="5' offset added to the exon-type GTF entry"
+                       help="Exon-type entries are often used to measure expression. Because of the small size of the fragments it may be desired to use an offset." argument="--offset5p" />
+                <param name="offset3p" type="integer" value="4"
+                       label="3' offset added to the exon-type GTF entry"
+                       help="Exon-type entries are often used to measure expression. Because of the small size of the fragments it may be desired to use an offset." argument="--offset3p" />
+            </when>
+        </conditional>
         
         <param name="parameters" type="data" format="txt,tabular" optional="true"
-               label="Optional: custom parameters file" help="" />
+               label="(Optional) Custom parameters file" help="" argument="-p" />
         
     </inputs>
     
     <outputs>
         <data format="tabular" name="output"
-              label="${tool.name} on $on_string" />
+              label="${tool.name} on $on_string">
+            <change_format>
+                <when input="output_select.output_format" value="1" format="tabular" />
+                <when input="output_select.output_format" value="2" format="gtf" />
+            </change_format>
+        </data>
     </outputs>
     
     <tests>
@@ -133,12 +146,12 @@ Input
 Alignment
 *********
 
-Aligned single end reads from small RNA-Seq experiments have to be provided in the BAM format.
+This file has to contain aligned single end reads from a small RNA-Seq experiment, provided in the BAM format.
 
-There are two strategies to analyze using FlaiMapper:
+Prior to running FlaiMapper, it is common to align sequencing reads to either:
 
-- Relative to mature ncRNA sequences
-- Relative to chromosomes
+- mature ncRNA sequences
+- all chromosomes
 
 Example- and reference data
 ***************************
@@ -152,6 +165,10 @@ If you want to test FlaiMapper with example data you can obtain several
 alignment files from the following directory tree:
 
 https://github.com/yhoogstrate/flaimapper/tree/master/share/small_RNA-seq_alignments
+
+More details are given in the manual at the following website:
+
+https://github.com/yhoogstrate/flaimapper
     ]]></help>
     
     <citations>
