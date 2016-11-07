@@ -10,9 +10,10 @@ art_SOLiD
 
     $sam
 
-    #if $rndSeed and $rndSeed > -1:
+    #if str($rndSeed) != '-1':
         -r $rndSeed
     #end if
+
 
     #if $generate.amplicon.use_amplicon == "amplicon_true":
         -A
@@ -63,7 +64,7 @@ art_SOLiD
         <param name="choice" type="select" label="Type of data to generate">
             <option value="single_end">Single-End</option>
             <option value="paired_end">Paired-End</option>
-            <option value="paired_end">Mate Pair</option>
+            <option value="mate_pair">Mate Pair</option>
         </param>
         <when value="single_end">
             <param name="LEN_READ" type="integer" label="Length of F3/R3 reads" value="100" />
@@ -117,17 +118,16 @@ art_SOLiD
   <tests>
       <!--  Single End tests -->
       <test>
-          <param name="rndSeed" value="42" />
           <param name="input_seq_file" value="input.fa" />
           <param name="LEN_READ" value="25" />
           <param name="fold_coverage" value="10" />
           <param name="choice" value="single_end" />
           <param name="sam" value="False" />
+          <param name="rndSeed" value="1337" />
 
           <output name="output_fq1_single" file="art.solid.01.fq" compare="sim_size" delta="5000" />
       </test>
       <test>
-          <param name="rndSeed" value="42" />
           <param name="input_seq_file" value="input.fa" />
           <param name="fold_coverage" value="20" />
           <param name="choice" value="paired_end" />
@@ -136,6 +136,7 @@ art_SOLiD
           <param name="fragment_size" value="75" />
           <param name="fragment_sd" value="10" />
           <param name="sam" value="True" />
+          <param name="rndSeed" value="1337" />
 
           <output name="output_fq1_paired" file="art.solid.02_F3.fq" compare="sim_size" delta="5000" />
           <output name="output_fq2_paired" file="art.solid.02_F5.fq" compare="sim_size" delta="5000" />
