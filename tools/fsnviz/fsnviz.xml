@@ -1,0 +1,39 @@
+<tool id="fsnviz" name="FsnViz" version="0.2.0.0">
+    <description>plotting gene fusion events using Circos</description>
+    <requirements>
+    </requirements>
+    <version_command><![CDATA[
+        echo $(fsnviz --version)", "$(python --version 2>&1)
+    ]]></version_command>
+    <command><![CDATA[
+        fsnviz
+            --svg
+             $input_format
+            '${input_file}'
+    ]]></command>
+    <inputs>
+        <param type="select" name="input_format">
+            <option value="star-fusion">STAR-Fusion tabular output</option>
+            <option value="fusioncatcher">FusionCatcher final file</option>
+        </param>
+        <param name="input_file" type="data" format="tabular" label="Input file" />
+    </inputs>
+    <outputs>
+        <data format="svg" name="out_figure_svg" from_work_dir="fsnviz.svg"/>
+        <data format="txt" name="txt_genes" from_work_dir="genes.txt"/>
+        <data format="txt" name="txt_junction_reads" from_work_dir="junction_reads.txt"/>
+        <data format="txt" name="txt_links" from_work_dir="links.txt"/>
+        <data format="txt" name="txt_spanning_frags" from_work_dir="spanning_frags.txt"/>
+    </outputs>
+    <tests>
+        <test>
+            <param name="input_format" value="star-fusion" />
+            <param name="input_file" value="star_fusion_v060_01.txt" />
+            
+            <output name="out_svg_fig" value="star_fusion_v060_01.txt.svg" />
+        </test>
+    </tests>
+    <help><![CDATA[
+        TODO: Fill in help.
+    ]]></help>
+</tool>
